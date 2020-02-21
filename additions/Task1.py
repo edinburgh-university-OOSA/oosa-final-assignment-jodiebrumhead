@@ -2,6 +2,8 @@ import argparse
 import numpy as np
 import sys
 sys.path.append('../src')
+import resource
+
 
 from processLVIS import *
 from handleTiff import *
@@ -38,7 +40,6 @@ class indfile():
 
 class packArray():
     #data = lvis.zG
-    #data = lvis.lon
     #lvis.lat
     def __init__(self,data,x,y,res):
 
@@ -48,26 +49,29 @@ class packArray():
 
         '''
         self.res = res
-
+        print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
         # determine bounds
         self.minX=np.min(x)
         maxX=np.max(x)
         minY=np.min(y)
         self.maxY=np.max(y)
 
+        print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
         # determine image size
         self.nX=int((maxX-self.minX)/self.res+1)
         self.nY=int((self.maxY-minY)/self.res+1)
-
+        print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
         # pack in to array
-        self.imageArr=np.full((self.nY,self.nX),-999.0)        # make an array of missing data flags
+        self.imageArr=np.full((self.nY,self.nX),-999)        # make an array of missing data flags
         xInds=np.array((x-self.minX)/self.res,dtype=int)  # determine which pixels the data lies in
         yInds=np.array((self.maxY-y)/self.res,dtype=int)  # determine which pixels the data lies in
 
+        print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
         # this is a simple pack which will assign a single footprint to each pixel try to change this to find average?
 
         self.imageArr[yInds,xInds]=data
-
+        print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
 class interpolate():
     pass
@@ -123,9 +127,9 @@ if __name__ == "__main__":
 
 
     a=indfile(infilename, testing, inEPSG, outEPSG)
-
+    print('indfile done')
     aa=packArray(a.c.zG, a.c.lat, a.c.lon, res)
-
+    print('arraypacked')
     aaa=tiffHandle(outfilename)
 
     tiffHandle.writeTiff(aa,outfilename,outEPSG)
