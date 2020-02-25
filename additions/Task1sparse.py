@@ -15,8 +15,7 @@ from handleTiff import *
 from filename import *
 from bytesprint import *
 
-import os
-tot_m, used_m, free_m = map(int, os.popen('free -t -m').readlines()[-1].split()[1:])
+
 
 """Class to process and individual h5 lvis file to find ground level of each wave"""
 
@@ -53,16 +52,13 @@ class indfile():
 
         else:
             self.c=lvisGround(filename)
-        print(f'RAM usage: {ps((resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)*1000)}')
         # set elevation
         self.c.setElevations()
         # find the ground
         self.c.estimateGround()
-        print(f'RAM usage: {ps((resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)*1000)}')
         self.c.dumpCoords()
         #self.zG is CofG
         self.c.reproject(inEPSG, outEPSG) # work out how to do this ... which EPSGs do you need
-        print(f'RAM usage: {ps((resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)*1000)}')
 
 
 class packArray():
@@ -83,36 +79,33 @@ class packArray():
         minY=np.min(y)
         self.maxY=np.max(y)
 
-        print(f'RAM usage: {ps((resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)*1000)}')
+
 
         # determine image size
         self.nX=int((maxX-self.minX)/self.res+1)
         self.nY=int((self.maxY-minY)/self.res+1)
-        print(f'RAM usage: {ps((resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)*1000)}')
+
 
         self.xInds=np.array((x-self.minX)/self.res,dtype=int)  # determine which pixels the data lies in
         self.yInds=np.array((self.maxY-y)/self.res,dtype=int)  # determine which pixels the data lies in
 
-        print(f'sparse ram {ps(self.yInds.nbytes+self.xInds.nbytes+z.nbytes)}')
-
 
         data = scipy.sparse.csr_matrix((z,(self.yInds,self.xInds)),dtype=float)
-        print(ps(data.data.nbytes))
+        print(f'Sparse Array RAM:{ps(data.data.nbytes)}')
 
-        print(f'RAM usage: {ps((resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)*1000)}')
         # set geolocation information (note geotiffs count down from top edge in Y)
         geotransform = (self.minX, self.res, 0, self.maxY, 0, -1*self.res)
-        print(f'RAM usage: {ps((resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)*1000)}')
+
         # load data in to geotiff object
         dst_ds = gdal.GetDriverByName('GTiff').Create(filename, self.nX, self.nY, 1, gdal.GDT_Float32)
-        print(f'RAM usage: {ps((resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)*1000)}')
+
         dst_ds.SetGeoTransform(geotransform)    # specify coords
         srs = osr.SpatialReference()            # establish encoding
         srs.ImportFromEPSG(epsg)                # WGS84 lat/long
         dst_ds.SetProjection(srs.ExportToWkt()) # export coords to fill
         offset = 1
         dst_ds.GetRasterBand(1)
-        print(f'RAM usage: {ps((resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)*1000)}')
+
         for i in range(data.shape[0]):
             data_row = data[i,:].todense() # output row of sparse array as standard array
             data_row = np.where(data_row == 0, -999, data_row)
@@ -120,8 +113,8 @@ class packArray():
             dst_ds.GetRasterBand(1).WriteArray(data_row,0,offset*i)
             dst_ds.GetRasterBand(1).SetNoDataValue(-999)
             dst_ds.FlushCache()
-        print(f' Row bytes{ps(data_row.nbytes)}')
-        print(f'RAM usage: {ps((resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)*1000)}')
+        print(f'Row bytes:{ps(data_row.nbytes)}')
+
         dst_ds = None
 
 
@@ -182,11 +175,11 @@ if __name__ == "__main__":
 
     a=indfile(infilename, testing, inEPSG, outEPSG, pig)
     print(f'{f.file} processed')
-    print(f'RAM usage: {ps((resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)*1000)}')
+
     aa=packArray(a.c.zG, a.c.lon, a.c.lat, res, outfilename, outEPSG)
     print(f'{outfilename} created')
+
     print(f'RAM usage: {ps((resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)*1000)}')
 
     end = timer()
-
     print(end-start)
