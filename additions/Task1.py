@@ -1,7 +1,4 @@
-"""
-
-"""
-
+# Import standard packages
 import argparse
 import numpy as np
 import resource
@@ -9,8 +6,7 @@ from timeit import default_timer as timer
 import sys
 sys.path.append('../src')
 
-
-
+# Import other scripts from this repository
 from processLVIS import *
 from handleTiff import *
 from filename import *

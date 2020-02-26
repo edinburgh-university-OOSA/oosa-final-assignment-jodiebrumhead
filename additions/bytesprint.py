@@ -1,4 +1,4 @@
-
+"""Borrowed from stack exchange to help read bytes outputs"""
 
 
 # bytes pretty-printing

@@ -12,11 +12,13 @@ class filenameregex():
         Does nothing as this is only an example
         '''
 
+    """Finds filename"""
     def findfilename(self, fileandpath):
 
-        self.file = re.search(r"ILVIS1B_[A-Z]{2}\d{4}_\d{4}_R\d{4}_\d{6}", fileandpath)
+        self.file = re.search(r"ILVIS1B_[A-Z]{2}\d{4}_\d{4}_R\d{4}_\d{6}", fileandpath) # finds where this pattern exists
         self.file = self.file.group()
 
+    """Splits file name into parts"""
     def finddeets(self):
 
         self.place = self.file[8:10]
@@ -29,7 +31,6 @@ class filenameregex():
 if __name__ == '__main__':
 
     """Calls to test functions work as expected"""
-    #could improve this by testing on more
 
     fileandpath = '/geos/netdata/avtrain/data/3d/oosa/assignment/lvis/2015/ILVIS1B_AQ2015_1017_R1605_043439.h5'
 
