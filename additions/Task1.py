@@ -49,8 +49,7 @@ class indfile():
 
 
 class packArray():
-    #data = lvis.zG
-    #lvis.lat
+
     def __init__(self,data,x,y,res):
 
         '''
@@ -59,19 +58,15 @@ class packArray():
 
         '''
         self.res = res
-        #print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
         # determine bounds
         self.minX=np.min(x)
         maxX=np.max(x)
         minY=np.min(y)
         self.maxY=np.max(y)
 
-        #print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-
         # determine image size
         self.nX=int((maxX-self.minX)/self.res+1)
         self.nY=int((self.maxY-minY)/self.res+1)
-
 
         # pack in to array
         self.imageArr=np.full((self.nY,self.nX),-999, dtype=np.int16)
@@ -79,15 +74,12 @@ class packArray():
         # dtype=np.int16 reduces data usage - cant use unsigned due to negative vals over sea
         print(f'Image array bytes: {ps(self.imageArr.nbytes)}')
 
-
         self.xInds=np.array((x-self.minX)/self.res,dtype=int)  # determine which pixels the data lies in
         #print(self.xInds.nbytes)
         self.yInds=np.array((self.maxY-y)/self.res,dtype=int)  # determine which pixels the data lies in
         #print(self.yInds.nbytes)
 
-
         # this is a simple pack which will assign a single footprint to each pixel try to change this to find average?
-
         self.imageArr[self.yInds,self.xInds]=data
         print(f'Image array bytes: {ps(self.imageArr.nbytes)}')
 
