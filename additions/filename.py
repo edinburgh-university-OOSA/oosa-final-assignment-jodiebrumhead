@@ -6,7 +6,7 @@ Class to hold funtions to extract information from path and filename
 
 class filenameregex():
 
-    def __init__(sel):
+    def __init__(self):
         '''
         Class initialiser
         Does nothing as this is only an example

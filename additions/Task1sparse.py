@@ -35,30 +35,58 @@ class indfile():
             # read in bounds
             self.c=lvisGround(filename,minX=x0,minY=y0,maxX=x1,maxY=y1)
 
+            self.c.setElevations()
+            # find the ground
+            self.c.estimateGround()
+            self.c.dumpCoords()
+            #self.zG is CofG
+            self.c.reproject(inEPSG, outEPSG) # work out how to do this ... which EPSGs do you need
+
         elif pig == True:
 
             # find bounds
             b=lvisGround(filename,onlyBounds=True)
-            #print(b.bounds)
+            subset = (len(self.lat))/70000 # splits files into approx 10 chunks dependent upon number of records
 
             pigbounds = [257.834821526081, -75.76906402888673, 282.2133984738954, -65.11822059831096]
 
-            x0 = pigbounds[0]
-            y0 = pigbounds[1]
-            x1 = pigbounds[2]
-            y1 = pigbounds[3]
-            # read in bounds
-            self.c=lvisGround(filename,minX=x0,minY=y0,maxX=x1,maxY=y1)
+            # create empty arrays to append to in loop
+            x = np.empty(0)
+            y = np.empty(0)
+            z = np.empty(0)
 
-        else:
+            for i in len(subset):
+                x0 = (i*((pigbounds[2]-pigbounds[0])))/subset+pigbounds[0]
+                y0 = pigbounds[1]
+                x1 = ((i+1)*((pigbounds[2]-pigbounds[0])))/subset+pigbounds[0]
+                y1 = pigbounds[3]
+                # read in bounds
+                self.c=lvisGround(filename,minX=x0,minY=y0,maxX=x1,maxY=y1)
+
+                self.c.setElevations()
+                # find the ground
+                self.c.estimateGround()
+                self.c.dumpCoords()
+                #self.zG is CofG
+                self.c.reproject(inEPSG, outEPSG)
+
+                x = np.append(x, self.c.lon)
+                y = np.append(y, self.c.lat)
+                z = np.append(z, self.c.zG)
+
+            self.c.lon = x
+            self.c.lat = y
+            self.c.zG = z
+
+        else: # run whole file
             self.c=lvisGround(filename)
-        # set elevation
-        self.c.setElevations()
-        # find the ground
-        self.c.estimateGround()
-        self.c.dumpCoords()
-        #self.zG is CofG
-        self.c.reproject(inEPSG, outEPSG) # work out how to do this ... which EPSGs do you need
+            # set elevation
+            self.c.setElevations()
+            # find the ground
+            self.c.estimateGround()
+            self.c.dumpCoords()
+            #self.zG is CofG
+            self.c.reproject(inEPSG, outEPSG) # work out how to do this ... which EPSGs do you need
 
 
 class packArray():

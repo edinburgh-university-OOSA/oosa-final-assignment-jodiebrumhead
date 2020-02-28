@@ -66,7 +66,7 @@ def ap():
     help='Input path for files you wish to process')
 
     parser.add_argument('-y', '--year',
-    default='2009',
+    default='2015',
     help='Input year you wish to process')
 
     parser.add_argument('-r', '--resolution', default=100, type=int, help='Enter resolution(m) for output DEM (Default = 10m)')
@@ -79,7 +79,7 @@ def ap():
 
     parser.add_argument('-t2', '--testing2', default=False, type=bool, help='Enter True to run test number of files (Default = False)')
 
-    parser.add_argument('-g', '--glacier', default=True, type=bool, help='Enter False to run area of all files, True to run area over Pine Island Glacier alone (Default = True)')
+    parser.add_argument('-g', '--glacier', default=False, type=bool, help='Enter False to run area of all files, True to run area over Pine Island Glacier alone (Default = True)')
 
     return parser.parse_args()
 
@@ -106,23 +106,23 @@ fileList = glob(dir+'/*.h5') # search directory for files ending in .h5
 if testing2 is True:
     fileList = fileList[:3] # run on just 3 files to test
 
-outfilelist = []
-
-# create empty arrays to append to in loop
-x = np.empty(0)
-y = np.empty(0)
-z = np.empty(0)
+outfilename = year + '.tif'
 
 # loop through each file in the list
 for infilename in fileList:
     print(infilename)
+
+    # create empty arrays to append to in loop
+    x = np.empty(0)
+    y = np.empty(0)
+    z = np.empty(0)
+
 
     # Extract details from path
     f=filenameregex()
     f.findfilename(infilename) # find file name within path
     f.finddeets()
 
-    outfilename = year + ".tif"
 
     # Try except loop as some files may not be within bounds
     try:
@@ -142,6 +142,7 @@ for infilename in fileList:
 aa=packArray(z, x, y, res, outfilename, outEPSG)
 print(f'{outfilename} created')
 
+out_fp = '2015_200228.tif'
 # Clip file to make sure we are not inrpolating more than we need to
 clip1(outfilename, outEPSG, out_fp)
 
@@ -150,5 +151,5 @@ clip1(outfilename, outEPSG, out_fp)
 print('Interpolating tif....')
 gfname = year+'_gf.tif'
 
-tiftotifgf(out_fp, gfname, outEPSG, 0.40)
+tiftotifgf(out_fp, gfname, outEPSG, 0.75)
 print(f'Tiff gap filled and output as {gfname}')

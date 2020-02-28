@@ -21,7 +21,8 @@ def gapfill(arr, w, p):
         i = i+1
         n = np.sum(np.isnan(arr)) # number of nans
         print(f'Loop no: {i}')
-        print(f'Left to fill :{n}'')
+        print(f'Left to fill :{n}')
+        copyarr = arr.copy()
         for index, x in np.ndenumerate(arr):
             #print(index, x)
             #print(f'{j}')
@@ -34,7 +35,8 @@ def gapfill(arr, w, p):
                     pass
                 else:
                     s = s[np.logical_not(np.isnan(s))] # remove nan and flatten
-                    arr[index] = np.mean(s) # calculate mean and input into array
+                    copyarr[index] = np.mean(s) # calculate mean and input into array
+        arr = copyarr.copy()
 
     return arr # return array with filled values
 
@@ -67,9 +69,9 @@ if __name__ == '__main__':
 
     #Test case pretend data
     arr = np.array([-999, 2, 3, 4, 5, 6, 7, -999, 9, -999, 5, 60, 10, 4, 8, 9, -999, 4, 6, 8, 2, 15, -999, 6, 14]).reshape(5,5)
-    print(arr)
+    print(arr.sum())
     arr = gapfill(arr, 1, 0.5)
-    print(arr)
+    print(arr.sum())
 
     # Test case small subsection of real data
 
